@@ -7,6 +7,7 @@ import pl.school.ithelpdesk.dto.TicketResponse;
 import pl.school.ithelpdesk.entity.Ticket;
 import pl.school.ithelpdesk.entity.TicketStatus;
 import pl.school.ithelpdesk.repository.TicketRepository;
+import pl.school.ithelpdesk.exception.TicketNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +50,7 @@ public class TicketService {
     public TicketResponse updateTicketStatus(Long id, TicketStatus status) {
 
         Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new TicketNotFoundException(id));
 
         ticket.setStatus(status);
 
