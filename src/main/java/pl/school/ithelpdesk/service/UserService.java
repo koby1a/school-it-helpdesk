@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import pl.school.ithelpdesk.entity.Role;
 import pl.school.ithelpdesk.entity.User;
 import pl.school.ithelpdesk.repository.UserRepository;
+import pl.school.ithelpdesk.dto.CreateUserRequest;
+import pl.school.ithelpdesk.dto.UserResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -12,14 +14,20 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User createUser(String username, String password) {
+    public UserResponse createUser(CreateUserRequest request) {
 
         User user = new User();
 
-        user.setUsername(username);
-        user.setPassword(password);
+        user.setUsername(request.getUsername());
+        user.setPassword(request.getPassword());
         user.setRole(Role.USER);
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        return new UserResponse(
+                savedUser.getId(),
+                savedUser.getUsername(),
+                savedUser.getRole().name()
+        );
     }
 }
