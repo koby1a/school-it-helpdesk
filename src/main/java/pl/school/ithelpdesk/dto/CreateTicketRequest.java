@@ -8,9 +8,9 @@ import lombok.Setter;
 @Setter
 public class CreateTicketRequest {
 
-    @NotBlank
+    @NotBlank(message = "Title cannot be blank")
     private String title;
 
-    @NotBlank
+    @NotBlank(message = "Description cannot be blank")
     private String description;
 }
