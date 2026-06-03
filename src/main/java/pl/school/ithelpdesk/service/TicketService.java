@@ -45,4 +45,20 @@ public class TicketService {
                 ))
                 .toList();
     }
+
+    public TicketResponse updateTicketStatus(Long id, TicketStatus status) {
+
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        ticket.setStatus(status);
+
+        Ticket savedTicket = ticketRepository.save(ticket);
+
+        return new TicketResponse(
+                savedTicket.getId(),
+                savedTicket.getTitle(),
+                savedTicket.getStatus().name()
+        );
+    }
 }

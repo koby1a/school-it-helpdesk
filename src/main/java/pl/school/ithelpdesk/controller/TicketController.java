@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import pl.school.ithelpdesk.dto.CreateTicketRequest;
 import pl.school.ithelpdesk.dto.TicketResponse;
 import pl.school.ithelpdesk.service.TicketService;
+import pl.school.ithelpdesk.entity.TicketStatus;
+
 import java.util.List;
 
 @RestController
@@ -25,5 +27,13 @@ public class TicketController {
     @GetMapping
     public List<TicketResponse> getAllTickets() {
         return ticketService.getAllTickets();
+    }
+
+    @PatchMapping("/{id}/status")
+    public TicketResponse updateTicketStatus(
+            @PathVariable Long id,
+            @RequestParam TicketStatus status
+    ) {
+        return ticketService.updateTicketStatus(id, status);
     }
 }
