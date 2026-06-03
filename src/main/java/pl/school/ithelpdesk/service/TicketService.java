@@ -9,6 +9,7 @@ import pl.school.ithelpdesk.entity.TicketStatus;
 import pl.school.ithelpdesk.repository.TicketRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +33,16 @@ public class TicketService {
                 savedTicket.getTitle(),
                 savedTicket.getStatus().name()
         );
+    }
+
+    public List<TicketResponse> getAllTickets() {
+        return ticketRepository.findAll()
+                .stream()
+                .map(ticket -> new TicketResponse(
+                        ticket.getId(),
+                        ticket.getTitle(),
+                        ticket.getStatus().name()
+                ))
+                .toList();
     }
 }
