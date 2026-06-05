@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pl.school.ithelpdesk.dto.CreateTicketRequest;
 import pl.school.ithelpdesk.dto.TicketResponse;
+import pl.school.ithelpdesk.dto.AssignTicketRequest;
 import pl.school.ithelpdesk.service.TicketService;
 import pl.school.ithelpdesk.entity.TicketStatus;
 
@@ -35,5 +36,13 @@ public class TicketController {
             @RequestParam TicketStatus status
     ) {
         return ticketService.updateTicketStatus(id, status);
+    }
+
+    @PatchMapping("/{id}/assign")
+    public TicketResponse assignTicketToUser(
+            @PathVariable Long id,
+            @Valid @RequestBody AssignTicketRequest request
+    ) {
+        return ticketService.assignTicketToUser(id, request);
     }
 }
