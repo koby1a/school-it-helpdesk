@@ -2,16 +2,18 @@ package pl.school.ithelpdesk.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.school.ithelpdesk.dto.AssignTicketRequest;
 import pl.school.ithelpdesk.dto.CreateTicketRequest;
 import pl.school.ithelpdesk.dto.TicketResponse;
-import pl.school.ithelpdesk.dto.AssignTicketRequest;
-import pl.school.ithelpdesk.entity.User;
 import pl.school.ithelpdesk.entity.Ticket;
+import pl.school.ithelpdesk.entity.TicketPriority;
 import pl.school.ithelpdesk.entity.TicketStatus;
+import pl.school.ithelpdesk.entity.User;
 import pl.school.ithelpdesk.exception.TicketNotFoundException;
 import pl.school.ithelpdesk.exception.UserNotFoundException;
-import pl.school.ithelpdesk.repository.UserRepository;
 import pl.school.ithelpdesk.repository.TicketRepository;
+import pl.school.ithelpdesk.repository.UserRepository;
+import pl.school.ithelpdesk.strategy.TicketPriorityStrategy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +24,7 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
+    private final List<TicketPriorityStrategy> priorityStrategies;
 
     public TicketResponse createTicket(CreateTicketRequest request) {
 
@@ -30,6 +33,7 @@ public class TicketService {
         ticket.setTitle(request.getTitle());
         ticket.setDescription(request.getDescription());
         ticket.setStatus(TicketStatus.OPEN);
+        ticket.setPriority(determinePriority(request.getTitle(), request.getDescription()));
         ticket.setCreatedAt(LocalDateTime.now());
 
         Ticket savedTicket = ticketRepository.save(ticket);
@@ -71,6 +75,14 @@ public class TicketService {
         return mapToResponse(savedTicket);
     }
 
+    private TicketPriority determinePriority(String title, String description) {
+        return priorityStrategies.stream()
+                .filter(strategy -> strategy.supports(title, description))
+                .findFirst()
+                .map(TicketPriorityStrategy::getPriority)
+                .orElse(TicketPriority.LOW);
+    }
+
     private TicketResponse mapToResponse(Ticket ticket) {
         String assignedUsername = ticket.getAssignedUser() != null
                 ? ticket.getAssignedUser().getUsername()
@@ -80,6 +92,7 @@ public class TicketService {
                 ticket.getId(),
                 ticket.getTitle(),
                 ticket.getStatus().name(),
+                ticket.getPriority().name(),
                 assignedUsername
         );
     }

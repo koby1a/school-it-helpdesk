@@ -10,5 +10,6 @@ public class TicketResponse {
     private Long id;
     private String title;
     private String status;
+    private String priority;
     private String assignedUsername;
 }

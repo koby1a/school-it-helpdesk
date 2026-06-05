@@ -1,0 +1,2 @@
+ALTER TABLE tickets
+    ADD COLUMN priority VARCHAR(20) NOT NULL DEFAULT 'LOW';
