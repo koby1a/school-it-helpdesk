@@ -28,4 +28,8 @@ public class Ticket {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "assigned_user_id")
+    private User assignedUser;
 }

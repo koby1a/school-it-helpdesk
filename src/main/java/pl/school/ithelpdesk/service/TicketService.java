@@ -4,10 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.school.ithelpdesk.dto.CreateTicketRequest;
 import pl.school.ithelpdesk.dto.TicketResponse;
+import pl.school.ithelpdesk.dto.AssignTicketRequest;
+import pl.school.ithelpdesk.entity.User;
 import pl.school.ithelpdesk.entity.Ticket;
 import pl.school.ithelpdesk.entity.TicketStatus;
-import pl.school.ithelpdesk.repository.TicketRepository;
 import pl.school.ithelpdesk.exception.TicketNotFoundException;
+import pl.school.ithelpdesk.exception.UserNotFoundException;
+import pl.school.ithelpdesk.repository.UserRepository;
+import pl.school.ithelpdesk.repository.TicketRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +21,7 @@ import java.util.List;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final UserRepository userRepository;
 
     public TicketResponse createTicket(CreateTicketRequest request) {
 
@@ -29,21 +34,13 @@ public class TicketService {
 
         Ticket savedTicket = ticketRepository.save(ticket);
 
-        return new TicketResponse(
-                savedTicket.getId(),
-                savedTicket.getTitle(),
-                savedTicket.getStatus().name()
-        );
+        return mapToResponse(savedTicket);
     }
 
     public List<TicketResponse> getAllTickets() {
         return ticketRepository.findAll()
                 .stream()
-                .map(ticket -> new TicketResponse(
-                        ticket.getId(),
-                        ticket.getTitle(),
-                        ticket.getStatus().name()
-                ))
+                .map(this::mapToResponse)
                 .toList();
     }
 
@@ -56,10 +53,34 @@ public class TicketService {
 
         Ticket savedTicket = ticketRepository.save(ticket);
 
+        return mapToResponse(savedTicket);
+    }
+
+    public TicketResponse assignTicketToUser(Long ticketId, AssignTicketRequest request) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
+
+        ticket.setAssignedUser(user);
+
+        Ticket savedTicket = ticketRepository.save(ticket);
+
+        return mapToResponse(savedTicket);
+    }
+
+    private TicketResponse mapToResponse(Ticket ticket) {
+        String assignedUsername = ticket.getAssignedUser() != null
+                ? ticket.getAssignedUser().getUsername()
+                : null;
+
         return new TicketResponse(
-                savedTicket.getId(),
-                savedTicket.getTitle(),
-                savedTicket.getStatus().name()
+                ticket.getId(),
+                ticket.getTitle(),
+                ticket.getStatus().name(),
+                assignedUsername
         );
     }
 }
